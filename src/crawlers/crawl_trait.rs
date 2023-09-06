@@ -1,30 +1,36 @@
-use std::net::Ipv4Addr;
-use reqwest;
-use reqwest::Error as RequestError;
 use async_trait::async_trait;
-
+use std::net::Ipv4Addr;
 
 pub enum ProxyType {
     Http,
     Https,
 }
-pub struct Proxy{
+
+pub struct Proxy {
     pub ip: Ipv4Addr,
     pub port: i8,
-    pub proxy_type: ProxyType
+    pub proxy_type: ProxyType,
+}
+
+pub struct ChunkProxyCrawlSite {
+    pub urls: Vec<String>,
+    pub chunk_size: usize,
+}
+
+impl ChunkProxyCrawlSite {
+    fn new(urls: Vec<String>) -> Self {
+        Self {
+            urls: urls,
+            chunk_size: 100,
+        }
+    }
 }
 
 #[async_trait]
-pub trait ProxyCrawler{
+pub trait ProxyCrawler {
     fn crawl_proxies(&self) -> Vec<Proxy>;
+    async fn fetch_pages(proxy_crawl_site: ChunkProxyCrawlSite) -> Vec<String>;
+    fn parse_page(&self, html: &str);
 
-    async fn request_website(&self, url: &str) -> Result<String, RequestError> {
-        let response = reqwest::get(url).await?;
-        if response.status().is_success() {
-            let body = response.text().await?;
-            Ok(body)
-        } else {
-            Err(RequestError::from(response.error_for_status().unwrap_err()))
-        }
-    }
+    fn find_crawl_url(html: &str) -> Vec<String>;
 }
