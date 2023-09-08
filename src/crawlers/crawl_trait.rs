@@ -12,13 +12,23 @@ pub struct Proxy {
     pub proxy_type: ProxyType,
 }
 
+impl Proxy {
+    pub fn new(ip: &str, port: i8, proxy_type: ProxyType) -> Self {
+        Self {
+            ip: ip.parse::<Ipv4Addr>().unwrap(),
+            port: port,
+            proxy_type: ProxyType::Http,
+        }
+    }
+}
+
 pub struct ChunkProxyCrawlSite {
     pub urls: Vec<String>,
     pub chunk_size: usize,
 }
 
 impl ChunkProxyCrawlSite {
-    fn new(urls: Vec<String>) -> Self {
+    pub fn new(urls: Vec<String>) -> Self {
         Self {
             urls: urls,
             chunk_size: 100,
@@ -28,9 +38,7 @@ impl ChunkProxyCrawlSite {
 
 #[async_trait]
 pub trait ProxyCrawler {
-    fn crawl_proxies(&self) -> Vec<Proxy>;
-    async fn fetch_pages(proxy_crawl_site: ChunkProxyCrawlSite) -> Vec<String>;
-    fn parse_page(&self, html: &str);
-
-    fn find_crawl_url(html: &str) -> Vec<String>;
+    async fn crawl_proxies(&self) -> Vec<Proxy>;
+    async fn fetch_pages(&self, proxy_crawl_site: ChunkProxyCrawlSite) -> Vec<String>;
+    fn find_crawl_url(&self, html: &str) -> Vec<String>;
 }
