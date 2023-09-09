@@ -63,16 +63,17 @@ impl ProxyCrawler for FreeProxyListSite {
         }
         let each_page_contents = self.fetch_pages(ChunkProxyCrawlSite::new(crawl_urls)).await;
         let result: String = each_page_contents.join("\n");
-        let proxy_ips = self
+        let proxy_ips: Vec<Proxy> = self
             .proxy_pattern
-            .captures(&result)
+            .captures_iter(&result)
             .map(|m| {
                 Proxy::new(
                     m.name("ip").unwrap().as_str(),
                     m.name("port").unwrap().as_str().parse::<i8>().unwrap(),
                     ProxyType::Http,
                 )
-            });
+            })
+            .collect();
         proxy_ips
     }
 
