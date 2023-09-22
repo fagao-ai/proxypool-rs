@@ -17,7 +17,7 @@ impl Proxy {
         Self {
             ip: ip.parse::<Ipv4Addr>().unwrap(),
             port: port,
-            proxy_type: ProxyType::Http,
+            proxy_type: proxy_type,
         }
     }
 }

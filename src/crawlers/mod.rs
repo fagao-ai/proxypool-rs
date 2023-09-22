@@ -1,5 +1,5 @@
 mod crawl_trait;
-mod providers;
+pub mod providers;
 
 
 pub use crawl_trait::ProxyCrawler;

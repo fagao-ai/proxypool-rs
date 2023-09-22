@@ -10,16 +10,18 @@ use regex::Regex;
 
 use super::crawl_trait::ProxyType;
 
-struct FreeProxyListSite {
+#[derive(Debug)]
+pub struct FreeProxyListSite {
     domain: String,
     proxy_pattern: Regex,
 }
 
+
 impl FreeProxyListSite {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             domain: "freeproxylists.com".to_string(),
-            proxy_pattern: Regex::new(r"(?P<ip>(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?))(?=.*?(?:(?:(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?))|(?P<port>\d{2,5})))").unwrap(),
+            proxy_pattern: Regex::new(r"\b(?P<ip>(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?))(?::(?P<port>\d{2,5}))?\b").unwrap()
         }
     }
 }
@@ -37,7 +39,7 @@ impl ProxyCrawler for FreeProxyListSite {
                     resp.text().await
                 }
             }))
-            .await;
+                .await;
 
             for b in bodies {
                 match b {
@@ -63,7 +65,7 @@ impl ProxyCrawler for FreeProxyListSite {
         }
         let each_page_contents = self.fetch_pages(ChunkProxyCrawlSite::new(crawl_urls)).await;
         let result: String = each_page_contents.join("\n");
-        let proxy_ips: Vec<Proxy> = self
+        let proxy_ips = self
             .proxy_pattern
             .captures_iter(&result)
             .map(|m| {
@@ -92,3 +94,5 @@ impl ProxyCrawler for FreeProxyListSite {
         crawl_urls
     }
 }
+
+
